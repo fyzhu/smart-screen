@@ -1,6 +1,6 @@
 #!/bin/bash
 
-toolchain_path="/home/xiaozhi/Downloads/toolchain-sunxi-glibc-gcc-830/toolchain/bin"
+toolchain_path="/mnt/e/Downloads/toolchain-sunxi-glibc-gcc-830/toolchain/bin"
 
 function cue() {
     echo

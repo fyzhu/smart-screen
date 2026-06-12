@@ -13,4 +13,6 @@ char *get_time_str_nosymbol(int time_min);
 
 void system_signal_init(void);
 
+char* str_join(const char *s1, const char *s2);
+
 #endif

@@ -12,7 +12,7 @@
 #include "wpa_manager.h"
 
 #define WEATHER_CITY "guangzhou"
-#define WEATHER_KEY "SmazqPcltzTft-X3v"
+#define WEATHER_KEY "S155Qa0xyneshvhGt"
 
 typedef enum{
     OFF = 0,
@@ -79,6 +79,7 @@ typedef struct{
     uint32_t tomato_rest_remaining_time;
 
     char weather_info[50];
+    char air_info[50];
     char weather_city[20];
 
     TIME_SHOW_TYPE_E time_type;

@@ -16,6 +16,7 @@
 #include "http_manager.h"
 #include "lv_clock.h"
 #include "em_hal_time.h"
+#include "utils.h"
 
 #include <time.h>
 #include <sys/time.h>
@@ -31,6 +32,8 @@ static int sleep_time_count = 0; //60S Sleep
 static time_t timep;
 static struct tm time_temp;
 static lv_timer_t * refresh_timer = NULL;
+static lv_timer_t * weather_timer = NULL;
+
 static char time_str[20];
 
 static TIME_SHOW_TYPE_E page_type = TIME_TYPE_1;
@@ -109,24 +112,15 @@ static bool get_system_time(){
             sprintf(time_str,"%d:%d",time_temp.tm_hour,time_temp.tm_min);
         }
     }
-    if(time_temp.tm_hour == 0 && time_temp.tm_min == 0 && time_temp.tm_sec == 1){
-        return true;
-    }
-    return false;
+    
 }
 
 static void refresh(lv_event_t* event){
-    printf("refresh");
+    // printf("refresh");
     device_state_t* device_state = get_device_state();
     if(page_type == TIME_TYPE_1 || page_type == TIME_TYPE_2){
-        if(get_system_time()){
-            http_get_weather_async(WEATHER_KEY,device_state->weather_city);
-        }
+        get_system_time();
         lv_label_set_text(time_label,time_str);
-        if(page_type == TIME_TYPE_1){
-            lv_label_set_text(weather_label,get_device_state()->weather_info);
-            lv_obj_align_to(weather_label, time_label,LV_ALIGN_OUT_BOTTOM_MID,0,10);
-        }
     }else if(page_type == TIME_TYPE_3){
         //nothing to do , time update in lv_clock
     }
@@ -137,7 +131,7 @@ static void refresh(lv_event_t* event){
     }
     static bool is_first_init = true;
     if(device_state->wifi_connect_state == WPA_WIFI_CONNECT && is_first_init){
-        http_get_weather_async(WEATHER_KEY,device_state->weather_city);
+        http_get_weather_async(WEATHER_KEY, device_state->weather_city);
         em_hal_time_ntpd_update();
         is_first_init = false;
     }
@@ -165,9 +159,26 @@ static void refresh(lv_event_t* event){
     
 }
 
+static void refresh_weather(lv_event_t* event){
+    printf("refresh_weather_main\n");
+    device_state_t* device_state = get_device_state();
+    http_get_weather_async(WEATHER_KEY, device_state->weather_city);
+    http_get_air_async(WEATHER_KEY, device_state->weather_city);
+    if(page_type == TIME_TYPE_1){
+        lv_label_set_text(weather_label, str_join(device_state->weather_info, device_state->air_info));
+        lv_obj_align_to(weather_label, time_label, LV_ALIGN_OUT_BOTTOM_MID,0,10);
+    }
+}
+
 static void init_timer(){
     if(refresh_timer == NULL)
         refresh_timer = lv_timer_create((void*)refresh, 1000, NULL);
+}
+
+static void init_weather_timer(){
+    refresh_weather(NULL);
+    if(weather_timer == NULL)
+        weather_timer = lv_timer_create((void*)refresh_weather, 5 * 60 * 1000, NULL);
 }
 
 static void deinit_timer(){
@@ -195,7 +206,7 @@ static void menu_click_event_cb(lv_event_t * e){
         return;
     char* menu_name  = (char *)lv_event_get_user_data(e);
     printf("--->select menu = %s\n",menu_name);
-    printf("----->%d",strcmp(menu_name,"场景联动\0"));
+    printf("----->%d\n", strcmp(menu_name,"场景联动\0"));
     deinit_page_pulldowm_view();
     deinit_timer();
     deinit_clock0_obj(&lv_clock0);
@@ -461,4 +472,5 @@ void init_page_main(void)
     init_status_icon(cont);
 
     init_timer();
+    init_weather_timer();
 }

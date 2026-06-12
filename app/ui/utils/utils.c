@@ -79,6 +79,23 @@ void system_signal_init(){
     signal(SIGTSTP, signal_callback_func);
 }
 
+// 拼接两个字符串，返回新字符串，原串不变
+char* str_join(const char *s1, const char *s2)
+{
+    // 计算总长度 +1 存结束符 \0
+    size_t len1 = strlen(s1);
+    size_t len2 = strlen(s2);
+    char *new_str = (char*)malloc(len1 + len2 + 1);
+    
+    if (new_str == NULL)  // 内存分配失败判断
+        return NULL;
+
+    strcpy(new_str, s1);   // 复制第一个串
+    strcat(new_str, " ");
+    strcat(new_str, s2);   // 拼接第二个串
+    return new_str;
+}
+
 // typedef enum {
 //     WIFI_DISCONNECTED=0,
 //     WIFI_CONNECTED,

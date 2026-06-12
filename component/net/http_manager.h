@@ -5,6 +5,7 @@ typedef enum
 {
     NET_GET_WEATHER = 0,
     NET_GET_TIME,
+    NET_GET_AIR,
 }NET_COMM_ID;
 
 typedef struct
@@ -24,11 +25,15 @@ typedef struct
 } http_resp_data_t;
 
 typedef void (* weather_callback_fun)(char* str);
+typedef void (* air_callback_fun)(char* str);
 
 int http_request_create(void);
 
 void http_get_weather_async(char *key,char *city);
 
+void http_get_air_async(char *key,char *city);
+
 void http_set_weather_callback(weather_callback_fun func);
+void http_set_air_callback(air_callback_fun func);
 
 #endif

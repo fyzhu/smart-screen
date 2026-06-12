@@ -49,7 +49,7 @@ static void obj_font_set(lv_obj_t *obj,int type, uint16_t weight){
 }
 
 static void clean_show_view(lv_obj_t *parent){
-    printf("clean_show_view");
+    printf("clean_show_view\n");
     lv_obj_t * act_scr = parent;
     lv_disp_t * d = lv_obj_get_disp(act_scr);
 	if (d->prev_scr == NULL && (d->scr_to_load == NULL || d->scr_to_load == act_scr))

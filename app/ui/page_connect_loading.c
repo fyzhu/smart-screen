@@ -70,7 +70,8 @@ static void connect_status_callback_func(WPA_WIFI_CONNECT_STATUS_E status){
         lv_img_set_src(state_img,GET_IMAGE_PATH("icon_connect.png"));
         device_state_t* device_state = get_device_state();
         device_state->wifi_connect_state = WPA_WIFI_CONNECT;
-        http_get_weather_async(WEATHER_KEY,device_state->weather_city);
+        http_get_weather_async(WEATHER_KEY, device_state->weather_city);
+        http_get_air_async(WEATHER_KEY, device_state->weather_city);
         em_hal_time_ntpd_update();
         lv_anim_del_all();
         lv_img_set_angle(state_img,0);
@@ -153,7 +154,7 @@ void init_page_connect_loading(const char *name,const char *psw)
     lv_anim_set_path_cb(&anim,lv_anim_path_ease_in_out);
     lv_anim_start(&anim);
 
-    wpa_manager_add_callback(wifi_status_callback_func,connect_status_callback_func);
+    wpa_manager_add_callback(wifi_status_callback_func, connect_status_callback_func);
 
     wpa_ctrl_wifi_info_t wifi_info;
     if(strlen(name) > 32 || strlen(psw) > 32){

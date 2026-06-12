@@ -22,7 +22,7 @@
 static osal_queue_t net_queue = NULL;
 static osal_thread_t net_thread = NULL;
 static weather_callback_fun weather_callback_func = NULL;
-
+static air_callback_fun air_callback_func = NULL;
 /**
  * @brief 组装HTTP请求URL
  */
@@ -142,10 +142,10 @@ void parseWeatherData(const char *json_data) {
         return;
     }
     // 打印 location 字段
-    printf("Location Name: %s\n", cJSON_GetObjectItem(location, "name")->valuestring);
+    // printf("Location Name: %s\n", cJSON_GetObjectItem(location, "name")->valuestring);
     // 打印 now 字段
-    printf("Current Weather: %s\n", cJSON_GetObjectItem(now, "text")->valuestring);
-    printf("Temperature: %s\n", cJSON_GetObjectItem(now, "temperature")->valuestring);
+    // printf("Current Weather: %s\n", cJSON_GetObjectItem(now, "text")->valuestring);
+    // printf("Temperature: %s\n", cJSON_GetObjectItem(now, "temperature")->valuestring);
 
     char weather_info[50];
     memset(weather_info, 0, sizeof(weather_info));
@@ -157,6 +157,65 @@ void parseWeatherData(const char *json_data) {
     strcat(weather_info, "°C");
     if(weather_callback_func != NULL)
         weather_callback_func(weather_info);
+    cJSON_Delete(root);
+}
+
+void parseAirData(const char *json_data) {
+    cJSON *root = cJSON_Parse(json_data);
+    if (!root) {
+        fprintf(stderr, "Error parsing JSON data.\n");
+        return;
+    }
+    // 获取 results 数组
+    cJSON *results = cJSON_GetObjectItem(root, "results");
+    if (!results || !cJSON_IsArray(results)) {
+        fprintf(stderr, "Invalid JSON format: missing 'results' array.\n");
+        cJSON_Delete(root);
+        return;
+    }
+    int num_results = cJSON_GetArraySize(results);
+    if (num_results <= 0) {
+        fprintf(stderr, "No results found.\n");
+        cJSON_Delete(root);
+        return;
+    }
+    // 处理第一个结果
+    cJSON *result = cJSON_GetArrayItem(results, 0);
+    if (!result) {
+        fprintf(stderr, "Invalid JSON format: missing first result.\n");
+        cJSON_Delete(root);
+        return;
+    }
+    // 获取 location 对象
+    cJSON *location = cJSON_GetObjectItem(result, "location");
+    if (!location || !cJSON_IsObject(location)) {
+        fprintf(stderr, "Invalid JSON format: missing 'location' object.\n");
+        cJSON_Delete(root);
+        return;
+    }
+    // 获取 air 对象
+    cJSON *air = cJSON_GetObjectItem(result, "air");
+    if (!air || !cJSON_IsObject(air)) {
+        fprintf(stderr, "Invalid JSON format: missing 'air' object.\n");
+        cJSON_Delete(root);
+        return;
+    }
+    cJSON *city = cJSON_GetObjectItem(air, "city");
+    // 打印 location 字段
+    // printf("Location Name: %s\n", cJSON_GetObjectItem(location, "name")->valuestring);
+    // 打印 air 字段
+    // printf("Current Air Quality: %s\n", cJSON_GetObjectItem(city, "quality")->valuestring);
+    // printf("空气质量: %s\n", cJSON_GetObjectItem(city, "aqi")->valuestring);
+
+    char air_info[50];
+    memset(air_info, 0, sizeof(air_info));
+    // strcat(air_info, " ");
+    strcat(air_info, cJSON_GetObjectItem(city, "quality")->valuestring);
+    strcat(air_info, " ");
+    strcat(air_info, cJSON_GetObjectItem(city, "aqi")->valuestring);
+
+    if(air_callback_func != NULL)
+        air_callback_func(air_info);
     cJSON_Delete(root);
 }
 
@@ -178,10 +237,19 @@ static void* net_thread_fun(void *arg)
             switch(id)
             {
                 case NET_GET_WEATHER:
-                    printf("handle NET_GET_WEATHER\n");
-                    http_request_method(obj.host,obj.path,obj.type,obj.data,&response_json_str);
+                    // printf("handle NET_GET_WEATHER\n");
+                    http_request_method(obj.host, obj.path, obj.type, obj.data, &response_json_str);
                     if (response_json_str != NULL){
                         parseWeatherData(response_json_str);
+                        free(response_json_str);
+                    }
+                    break;
+                
+                case NET_GET_AIR:
+                    // printf("handle NET_GET_AIR\n");
+                    http_request_method(obj.host, obj.path, obj.type, obj.data, &response_json_str);
+                    if (response_json_str != NULL){
+                        parseAirData(response_json_str);
                         free(response_json_str);
                     }
                     break;
@@ -208,10 +276,27 @@ void http_get_weather_async(char *key,char *city){
         printf("queue send error");
     }
 }
+void http_get_air_async(char *key,char *city){
+    net_obj obj;    
+    memset(&obj, 0, sizeof(net_obj));
+    strcpy(obj.host,"https://api.seniverse.com");
+    sprintf(obj.path, "/v3/air/now.json?key=%s&location=%s&language=zh-Hans", key,city);
+    obj.id = NET_GET_AIR;
+    strcpy(obj.data,"");
+    strcpy(obj.type,"GET");
+    int ret = osal_queue_send(&net_queue, &obj, sizeof(net_obj), 1000);
+    if(ret == OSAL_ERROR)
+    {
+        printf("queue send error");
+    }
+}
 
 //设置获取天气回调函数
 void http_set_weather_callback(weather_callback_fun func){
     weather_callback_func = func;                       
+}
+void http_set_air_callback(air_callback_fun func){
+    air_callback_func = func;                       
 }
 
 //HTTP模块创建
@@ -227,7 +312,7 @@ int http_request_create()
         printf("create queue error");
         return -1;
     }   
-    ret = osal_thread_create(&net_thread,net_thread_fun, NULL);
+    ret = osal_thread_create(&net_thread, net_thread_fun, NULL);
     if(ret == OSAL_ERROR)
     {
         printf("create thread error");

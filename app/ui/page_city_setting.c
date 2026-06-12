@@ -58,8 +58,10 @@ static void roller_event_handler(lv_event_t *e){
 static void select_btn_click_event_cb(lv_event_t * e){
     lv_event_code_t code = lv_event_get_code(e);
     device_state_t* device_state = get_device_state();
-    memcpy(device_state->weather_city,cities[roller_index],sizeof(cities[roller_index]));
-    printf("roller index = %d %s\n",roller_index,device_state->weather_city);
+    printf("city size = %d\n", sizeof(cities[roller_index]));
+    // memcpy(device_state->weather_city, cities[roller_index], sizeof(cities[roller_index]));
+    strcpy(device_state->weather_city, cities[roller_index]);
+    printf("roller index = %d %s\n", roller_index, device_state->weather_city);
     http_get_weather_async(WEATHER_KEY,cities[roller_index]);
     device_param_write();
     delete_current_page(&com_style);
@@ -106,7 +108,7 @@ static lv_obj_t * init_select_btn(lv_obj_t *parent){
     lv_obj_set_style_radius(btn,35,0);
     lv_obj_set_style_bg_color(btn,APP_COLOR_BUTTON_DEFALUT,0);
     // lv_obj_set_style_opa(btn,LV_OPA_80,LV_STATE_PRESSED);
-    lv_obj_add_event_cb(btn,select_btn_click_event_cb,LV_EVENT_CLICKED,NULL);
+    lv_obj_add_event_cb(btn,select_btn_click_event_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t  * btn_label = lv_label_create(btn);
     obj_font_set(btn_label,FONT_TYPE_CN, FONT_SIZE_TEXT_1);
