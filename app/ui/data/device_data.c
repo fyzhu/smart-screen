@@ -274,7 +274,7 @@ void init_device_state()
     if (strlen(device_state.weather_city) == 0)
         strcpy(device_state.weather_city, "guangzhou");
     if (strlen(device_state.weather_info) == 0)
-        strcpy(device_state.weather_info, "广州 多云 26°C");
+        strcpy(device_state.weather_info, "多云 26°C");
     if (strlen(device_state.air_info) == 0)
         strcpy(device_state.air_info, "良好 50");
 

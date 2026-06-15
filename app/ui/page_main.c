@@ -22,7 +22,11 @@
 #include <sys/time.h>
 
 static lv_obj_t *time_label = NULL;
+static lv_obj_t *date_label = NULL;
+static lv_obj_t *week_label = NULL;
+static lv_obj_t *air_label = NULL;
 static lv_obj_t *weather_label = NULL;
+static lv_obj_t *location_label = NULL;
 static lv_obj_t *wifi_img = NULL;
 static lv_obj_t *ble_img = NULL;
 static lv_obj_t *vol_img = NULL;
@@ -35,6 +39,10 @@ static lv_timer_t *refresh_timer = NULL;
 static lv_timer_t *weather_timer = NULL;
 
 static char time_str[20];
+static char date_str[20];
+static char week_str[20];
+
+const char *week[] = {"周日","周一","周二","周三","周四","周五","周六"};
 
 static TIME_SHOW_TYPE_E page_type = TIME_TYPE_1;
 static int clock_type = 0;
@@ -126,6 +134,9 @@ static bool get_system_time()
             sprintf(time_str, "%d:%d", time_temp.tm_hour, time_temp.tm_min);
         }
     }
+    sprintf(date_str, "%d/%d", time_temp.tm_mon + 1, time_temp.tm_mday);
+    sprintf(week_str, "%s", week[time_temp.tm_wday]);
+
 }
 
 static void refresh(lv_event_t *event)
@@ -136,6 +147,8 @@ static void refresh(lv_event_t *event)
     {
         get_system_time();
         lv_label_set_text(time_label, time_str);
+        lv_label_set_text(date_label, date_str);
+        lv_label_set_text(week_label, week_str);
     }
     else if (page_type == TIME_TYPE_3)
     {
@@ -197,8 +210,10 @@ static void refresh_weather(lv_event_t *event)
     http_get_air_async(WEATHER_KEY, device_state->weather_city);
     if (page_type == TIME_TYPE_1)
     {
-        lv_label_set_text(weather_label, str_join(device_state->weather_info, device_state->air_info));
-        lv_obj_align_to(weather_label, time_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+        printf("set_air_text\n");
+        lv_label_set_text(air_label, device_state->air_info);
+        lv_label_set_text(weather_label, device_state->weather_info);
+        lv_label_set_text(location_label, device_state->weather_city);
     }
 }
 
@@ -326,15 +341,37 @@ static void init_item_view(lv_obj_t *parent, TIME_SHOW_TYPE_E type)
         obj_font_set(time_obj, FONT_TYPE_LETTER, FONT_SIZE_TIME_1);
         lv_label_set_text(time_label, time_str);
         lv_obj_set_style_text_color(time_obj, APP_COLOR_WHITE, 0);
-        lv_obj_align(time_obj, LV_ALIGN_TOP_MID, 0, 60);
+        lv_obj_align(time_obj, LV_ALIGN_TOP_LEFT, 0, 40);
 
-        lv_obj_t *weather_obj = lv_label_create(parent);
-        weather_label = weather_obj;
-        obj_font_set(weather_obj, FONT_TYPE_LETTER, FONT_SIZE_TEXT_1);
-        device_state_t *device_state = get_device_state();
-        lv_label_set_text(weather_obj, device_state->weather_info);
-        lv_obj_set_style_text_color(weather_obj, APP_COLOR_WHITE, 0);
-        lv_obj_align_to(weather_obj, time_obj, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+        date_label = lv_label_create(parent);
+        obj_font_set(date_label, FONT_TYPE_LETTER, FONT_SIZE_TEXT_1);
+        lv_label_set_text(date_label, date_str);
+        lv_obj_set_style_text_color(date_label, APP_COLOR_WHITE, 0);
+        lv_obj_align_to(date_label, time_obj, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+
+        week_label = lv_label_create(parent);
+        obj_font_set(week_label, FONT_TYPE_LETTER, FONT_SIZE_TEXT_1);
+        lv_label_set_text(week_label, week_str);
+        lv_obj_set_style_text_color(week_label, APP_COLOR_WHITE, 0);
+        lv_obj_align_to(week_label, date_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+
+        air_label = lv_label_create(parent);
+        obj_font_set(air_label, FONT_TYPE_LETTER, FONT_SIZE_TEXT_1);
+        lv_obj_set_style_text_color(air_label, APP_COLOR_WHITE, 0);
+        lv_obj_align_to(air_label, time_label, LV_ALIGN_OUT_RIGHT_BOTTOM, 30, 0);
+
+        weather_label = lv_label_create(parent);
+        obj_font_set(weather_label, FONT_TYPE_LETTER, FONT_SIZE_TEXT_1);
+        lv_obj_set_style_text_color(weather_label, APP_COLOR_WHITE, 0);
+        lv_obj_align_to(weather_label, air_label, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 10);
+
+        location_label = lv_label_create(parent);
+        obj_font_set(location_label, FONT_TYPE_LETTER, FONT_SIZE_TEXT_1);
+        lv_obj_set_style_text_color(location_label, APP_COLOR_WHITE, 0);
+        lv_obj_align_to(location_label, weather_label, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 10);
+        // device_state_t *device_state = get_device_state();
+        // lv_label_set_text(weather_obj, device_state->weather_info);
+        // lv_obj_align_to(weather_obj, time_obj, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
     }
     else if (type == TIME_TYPE_2)
     {
@@ -367,7 +404,7 @@ static void init_item_view(lv_obj_t *parent, TIME_SHOW_TYPE_E type)
 static lv_obj_t *init_info_view(lv_obj_t *parent)
 {
     lv_obj_t *cont = lv_obj_create(parent);
-    lv_obj_set_size(cont, 240, LV_PCT(100));
+    lv_obj_set_size(cont, 480, LV_PCT(100));
     lv_obj_center(cont);
     lv_obj_add_style(cont, &com_style, 0);
     lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICKABLE);
@@ -523,7 +560,7 @@ void init_page_main(void)
     lv_obj_add_flag(cont, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(cont, screen_click_event_cb, LV_EVENT_CLICKED, NULL);
 
-    lv_obj_t *user_avatar_obj = NULL;
+    // lv_obj_t *user_avatar_obj = NULL;
     // if (page_type == TIME_TYPE_2)
     // {
     //     lv_obj_t *gif_obj = lv_gif_create(cont);
@@ -544,7 +581,8 @@ void init_page_main(void)
     lv_obj_align(bg_img, LV_ALIGN_RIGHT_MID, -2, 0);
 
     lv_obj_t *info_obj = init_info_view(cont);
-    lv_obj_align_to(info_obj, user_avatar_obj, LV_ALIGN_OUT_RIGHT_MID, 40, 0);
+    // lv_obj_align_to(info_obj, user_avatar_obj, LV_ALIGN_OUT_RIGHT_MID, 40, 0);
+    lv_obj_align(info_obj, LV_ALIGN_LEFT_MID, 30, 20);
 
     lv_obj_t *menu_obj = init_menu_list(cont);
     lv_obj_align_to(menu_obj, info_obj, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
