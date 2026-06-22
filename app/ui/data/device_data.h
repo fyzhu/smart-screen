@@ -1,6 +1,6 @@
 /*
- * @Author: xiaozhi 
- * @Date: 2024-09-24 18:24:33 
+ * @Author: xiaozhi
+ * @Date: 2024-09-24 18:24:33
  * @Last Modified by: xiaozhi
  * @Last Modified time: 2024-09-25 01:14:51
  */
@@ -11,34 +11,39 @@
 #include "lvgl.h"
 #include "wpa_manager.h"
 
-#define WEATHER_CITY "guangzhou"
+#define WEATHER_CITY "广州" // 默认天气城市,好像没用到
 #define WEATHER_KEY "S155Qa0xyneshvhGt"
 
-typedef enum{
+typedef enum
+{
     OFF = 0,
     ON,
-}SWITCH_STATE_E;
+} SWITCH_STATE_E;
 
-typedef enum{
+typedef enum
+{
     DISCONNECT = 0,
     CONNECTING,
     CONNECT,
-}CONNECT_STATE_E;
+} CONNECT_STATE_E;
 
-typedef enum{
+typedef enum
+{
     TIME_TYPE_1 = 0,
     TIME_TYPE_2,
     TIME_TYPE_3,
-}TIME_SHOW_TYPE_E;
+} TIME_SHOW_TYPE_E;
 
-typedef enum{
+typedef enum
+{
     NOTICE_TYPE_ONLY_WIN = 0,
     NOTICE_TYPE_WIN_AND_AUDIO,
-}NOTICE_TYPE_E;
+} NOTICE_TYPE_E;
 
-typedef struct{
+typedef struct
+{
 
-    CONNECT_STATE_E ble_mesh_state; //ble mesh模组连接状态
+    CONNECT_STATE_E ble_mesh_state; // ble mesh模组连接状态
     CONNECT_STATE_E led_connect_state;
     CONNECT_STATE_E switch_connect_state;
     CONNECT_STATE_E body_sensor_connect_state;
@@ -63,12 +68,12 @@ typedef struct{
 
     SWITCH_STATE_E smart_coaster_state;
     uint8_t smart_coaster_data;
-    uint32_t smart_coaster_time; //单位：min
+    uint32_t smart_coaster_time; // 单位：min
     uint32_t smart_coaster_remaining_time;
 
     SWITCH_STATE_E flame_sensor_state;
     uint8_t flame_sensor_data;
-    uint32_t flame_sensor_time; //单位：min
+    uint32_t flame_sensor_time; // 单位：min
     uint32_t flame_sensor_remaining_time;
 
     SWITCH_STATE_E tomato_time_state;
@@ -85,8 +90,8 @@ typedef struct{
     TIME_SHOW_TYPE_E time_type;
     int clock_type;
 
-    WPA_WIFI_STATUS_E wifi_state;  //wifi开启状态
-    WPA_WIFI_CONNECT_STATUS_E wifi_connect_state; //wifi连接状态
+    WPA_WIFI_STATUS_E wifi_state;                 // wifi开启状态
+    WPA_WIFI_CONNECT_STATUS_E wifi_connect_state; // wifi连接状态
 
     int brightness_value;
     int volume_value;
@@ -98,13 +103,11 @@ typedef struct{
 
     bool is_disp_orientation;
 
-}device_state_t;
-
-
+} device_state_t;
 
 void init_device_state(void);
 
-device_state_t* get_device_state(void);
+device_state_t *get_device_state(void);
 
 void device_timer_init();
 

@@ -210,10 +210,25 @@ static void refresh_weather(lv_event_t *event)
     http_get_air_async(WEATHER_KEY, device_state->weather_city);
     if (page_type == TIME_TYPE_1)
     {
+        printf("set_location_text\n");
+        lv_label_set_text(location_label, device_state->weather_city);
+    }
+}
+
+void update_weather_label() {
+    device_state_t *device_state = get_device_state();
+    if (page_type == TIME_TYPE_1)
+    {
+        printf("set_weather_text\n");
+        lv_label_set_text(weather_label, device_state->weather_info);
+    }
+}
+void update_air_label() {
+    device_state_t *device_state = get_device_state();
+    if (page_type == TIME_TYPE_1)
+    {
         printf("set_air_text\n");
         lv_label_set_text(air_label, device_state->air_info);
-        lv_label_set_text(weather_label, device_state->weather_info);
-        lv_label_set_text(location_label, device_state->weather_city);
     }
 }
 

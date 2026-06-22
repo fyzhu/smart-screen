@@ -16,6 +16,7 @@
 #include "em_hal_audio.h"
 #include "em_hal_brightness.h"
 #include "page_conf.h"
+#include "page_main.h"
 
 // #define USE_SYSTEM_TIMER 1
 #ifndef USE_SYSTEM_TIMER
@@ -183,11 +184,14 @@ static void weather_callback_func(char *data)
 {
     printf("---->%s\n", data);
     strcpy(device_state.weather_info, data);
+    update_weather_label();
+
 }
 static void air_callback_func(char *data)
 {
     printf("---->%s\n", data);
     strcpy(device_state.air_info, data);
+    update_air_label();
 }
 static void connect_status_callback_func(WPA_WIFI_CONNECT_STATUS_E status)
 {
@@ -272,7 +276,7 @@ void init_device_state()
         device_state.volume_value = em_get_audio_vol();
 
     if (strlen(device_state.weather_city) == 0)
-        strcpy(device_state.weather_city, "guangzhou");
+        strcpy(device_state.weather_city, "广州");
     if (strlen(device_state.weather_info) == 0)
         strcpy(device_state.weather_info, "多云 26°C");
     if (strlen(device_state.air_info) == 0)
