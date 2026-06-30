@@ -47,13 +47,23 @@ target_link_libraries(demo PRIVATE
                         font
                         usb_hid
                         -Wl,--start-group
-                        ${CMAKE_SOURCE_DIR}/platform/t113/lib/libssl.so.1.1
-                        ${CMAKE_SOURCE_DIR}/platform/t113/lib/libcrypto.so.1.1
-                        ${CMAKE_SOURCE_DIR}/platform/t113/lib/libwolfssl.so
                         -lcurl
                         http
                         -Wl,--end-group
                         )
+
+if(NOT SIMULATOR_LINUX)
+    target_link_libraries(demo PRIVATE
+                            ${CMAKE_SOURCE_DIR}/platform/t113/lib/libssl.so.1.1
+                            ${CMAKE_SOURCE_DIR}/platform/t113/lib/libcrypto.so.1.1
+                            ${CMAKE_SOURCE_DIR}/platform/t113/lib/libwolfssl.so
+                            )
+else()
+    target_link_libraries(demo PRIVATE
+                            ssl
+                            crypto
+                            )
+endif()
 
 
 if(SIMULATOR_LINUX)
