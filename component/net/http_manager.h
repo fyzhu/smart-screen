@@ -11,9 +11,9 @@ typedef enum
 typedef struct
 {
     NET_COMM_ID id;
-    char host[100];
-    char path[100];
-    char data[50];
+    char host[128];
+    char path[512];
+    char data[128];
     char type[10];
     int loop_flag;
 }net_obj;

@@ -43,10 +43,16 @@ target_link_libraries(demo PRIVATE
                         lvgl
                         lvgl_porting
                         wifi
-                        http
                         player
                         font
                         usb_hid
+                        -Wl,--start-group
+                        ${CMAKE_SOURCE_DIR}/platform/t113/lib/libssl.so.1.1
+                        ${CMAKE_SOURCE_DIR}/platform/t113/lib/libcrypto.so.1.1
+                        ${CMAKE_SOURCE_DIR}/platform/t113/lib/libwolfssl.so
+                        -lcurl
+                        http
+                        -Wl,--end-group
                         )
 
 

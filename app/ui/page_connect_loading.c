@@ -70,8 +70,8 @@ static void connect_status_callback_func(WPA_WIFI_CONNECT_STATUS_E status){
         lv_img_set_src(state_img,GET_IMAGE_PATH("icon_connect.png"));
         device_state_t* device_state = get_device_state();
         device_state->wifi_connect_state = WPA_WIFI_CONNECT;
-        http_get_weather_async(WEATHER_KEY, device_state->weather_city);
-        http_get_air_async(WEATHER_KEY, device_state->weather_city);
+        http_get_weather_async(WEATHER_KEY, device_state->weather_location);
+        http_get_air_async(WEATHER_KEY, device_state->weather_latlon);
         em_hal_time_ntpd_update();
         lv_anim_del_all();
         lv_img_set_angle(state_img,0);

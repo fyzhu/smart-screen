@@ -9,10 +9,13 @@
 
 void delete_current_page(lv_style_t *style){
     lv_obj_t * act_scr = lv_scr_act();
+    if (act_scr == NULL || !lv_obj_is_valid(act_scr))
+        return;
     lv_disp_t * d = lv_obj_get_disp(act_scr);
-	if (d->prev_scr == NULL && (d->scr_to_load == NULL || d->scr_to_load == act_scr))
-	{
-		lv_obj_clean(act_scr);
-        lv_style_reset(style);
-	}
+    if (d != NULL && d->prev_scr == NULL && (d->scr_to_load == NULL || d->scr_to_load == act_scr))
+    {
+        lv_obj_clean(act_scr);
+        if (style != NULL)
+            lv_style_reset(style);
+    }
 }

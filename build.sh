@@ -55,7 +55,12 @@ fi
 
 if [ ${platform} == "t113" ];
 then
-    export STAGING_DIR="${toolchain_path}":$STAGING_DIR
+    toolchain_root="$(cd "${toolchain_path}/.." && pwd)"
+    export STAGING_DIR="${toolchain_root}"
+    if [ ! -x "${toolchain_path}/arm-openwrt-linux-gcc" ]; then
+        echo "Error: T113 cross compiler not found at ${toolchain_path}"
+        exit 1
+    fi
     echo "build t113 app"
     cd build
     cmake .. -DCMAKE_TOOLCHAIN_FILE=platform/t113/t113.cmake -DTOOLCHAIN_PATH="${toolchain_path}"

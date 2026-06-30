@@ -10,3 +10,5 @@
 # Normal rules
 #
 /build
+/build-linux
+/build-t113

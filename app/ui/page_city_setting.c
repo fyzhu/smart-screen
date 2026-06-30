@@ -16,12 +16,12 @@
 static lv_style_t com_style;
 
 static lv_obj_t *roller_obj = NULL;
-static uint16_t roller_index = 2;
-// 苏州部分填写suzhou时，会返回宿州信息，所以修改为城市ID
-// 详见https://seniverse.yuque.com/hyper_data/api_v3
-static char *cities[] = {"北京", "上海", "广州", "深圳", "天津", "重庆",
-                         "成都", "武汉", "南京", "杭州", "苏州", "青岛", "大连",
-                         "宁波", "厦门", "福州", "长沙", "南宁"};
+static uint16_t roller_index = 0;
+// 默认使用城市ID 101010100
+// 详见 https://devapi.qweather.com
+static char *cities[] = {"北京", "上海", "天津", "重庆"};
+static char *location_ids[] = {"101010100", "101020100", "101030100", "101040100"};
+static char *latlon[] = {"39.9042/116.4074", "31.2304/121.4737", "39.1256/117.1902", "29.5638/106.5505"};
 
 static void com_style_init()
 {
@@ -63,12 +63,13 @@ static void select_btn_click_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     device_state_t *device_state = get_device_state();
-    printf("city size = %d\n", sizeof(cities[roller_index]));
-    // memcpy(device_state->weather_city, cities[roller_index], sizeof(cities[roller_index]));
+    printf("city size = %zu\n", sizeof(cities[roller_index]));
+    strcpy(device_state->weather_location, location_ids[roller_index]);
     strcpy(device_state->weather_city, cities[roller_index]);
-    printf("roller index = %d %s\n", roller_index, device_state->weather_city);
-    http_get_weather_async(WEATHER_KEY, cities[roller_index]);
-    http_get_air_async(WEATHER_KEY, cities[roller_index]);
+    strcpy(device_state->weather_latlon, latlon[roller_index]);
+    printf("roller index = %d %s %s\n", roller_index, device_state->weather_location, device_state->weather_latlon);
+    http_get_weather_async(WEATHER_KEY, location_ids[roller_index]);
+    http_get_air_async(WEATHER_KEY, latlon[roller_index]);
     device_param_write();
     delete_current_page(&com_style);
     init_page_main();
@@ -158,7 +159,7 @@ static lv_obj_t *init_setting_param_view(lv_obj_t *parent)
     lv_obj_set_style_bg_opa(roller_obj, LV_OPA_TRANSP, LV_PART_SELECTED);
     lv_obj_set_style_bg_opa(roller_obj, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_roller_set_options(roller_obj,
-                          "北京\n上海\n广州\n深圳\n天津\n重庆\n成都\n武汉\n南京\n杭州\n苏州\n青岛\n大连\n宁波\n厦门\n福州\n长沙\n南宁",
+                          "北京\n上海\n天津\n重庆",
                           LV_ROLLER_MODE_NORMAL);
     lv_obj_add_event_cb(roller_obj, roller_event_handler, LV_EVENT_ALL, NULL);
     lv_font_t *font_select = get_font(FONT_TYPE_CN_LIGHT, FONT_SIZE_TITLE_1);

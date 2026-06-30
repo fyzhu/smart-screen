@@ -92,9 +92,9 @@ static void refresh(lv_event_t* event){
 static void refresh_weather(lv_event_t* event){
     printf("refresh_weather_sleep\n");
     device_state_t* device_state = get_device_state();
-    http_get_weather_async(WEATHER_KEY, device_state->weather_city);
-    http_get_air_async(WEATHER_KEY, device_state->weather_city);
-    if(page_type == TIME_TYPE_1){
+    http_get_weather_async(WEATHER_KEY, device_state->weather_location);
+    http_get_air_async(WEATHER_KEY, device_state->weather_latlon);
+    if(page_type == TIME_TYPE_1 && weather_label != NULL && lv_obj_is_valid(weather_label) && time_label != NULL && lv_obj_is_valid(time_label)){
         lv_label_set_text(weather_label, str_join(device_state->weather_info, device_state->air_info));
         lv_obj_align_to(weather_label, time_label, LV_ALIGN_OUT_BOTTOM_MID,0,10);
     }

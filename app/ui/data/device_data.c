@@ -182,15 +182,18 @@ void device_param_read()
 
 static void weather_callback_func(char *data)
 {
+    if (data == NULL)
+        return;
     printf("---->%s\n", data);
-    strcpy(device_state.weather_info, data);
+    snprintf(device_state.weather_info, sizeof(device_state.weather_info), "%s", data);
     update_weather_label();
-
 }
 static void air_callback_func(char *data)
 {
+    if (data == NULL)
+        return;
     printf("---->%s\n", data);
-    strcpy(device_state.air_info, data);
+    snprintf(device_state.air_info, sizeof(device_state.air_info), "%s", data);
     update_air_label();
 }
 static void connect_status_callback_func(WPA_WIFI_CONNECT_STATUS_E status)
@@ -276,7 +279,11 @@ void init_device_state()
         device_state.volume_value = em_get_audio_vol();
 
     if (strlen(device_state.weather_city) == 0)
-        strcpy(device_state.weather_city, "广州");
+        strcpy(device_state.weather_city, "北京");
+    if (strlen(device_state.weather_location) == 0)
+        strcpy(device_state.weather_location, "101010100");
+    if (strlen(device_state.weather_latlon) == 0)
+        strcpy(device_state.weather_latlon, "39.9042/116.4074");
     if (strlen(device_state.weather_info) == 0)
         strcpy(device_state.weather_info, "多云 26°C");
     if (strlen(device_state.air_info) == 0)

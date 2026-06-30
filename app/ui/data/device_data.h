@@ -11,8 +11,8 @@
 #include "lvgl.h"
 #include "wpa_manager.h"
 
-#define WEATHER_CITY "广州" // 默认天气城市,好像没用到
-#define WEATHER_KEY "S155Qa0xyneshvhGt"
+#define WEATHER_CITY "101010100" // 默认天气城市ID
+#define WEATHER_KEY "4d8edc7e5af44cd89edbf65ca46021bf"
 
 typedef enum
 {
@@ -86,6 +86,8 @@ typedef struct
     char weather_info[50];
     char air_info[50];
     char weather_city[20];
+    char weather_location[20];
+    char weather_latlon[50];
 
     TIME_SHOW_TYPE_E time_type;
     int clock_type;

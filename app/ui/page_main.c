@@ -146,9 +146,12 @@ static void refresh(lv_event_t *event)
     if (page_type == TIME_TYPE_1 || page_type == TIME_TYPE_2)
     {
         get_system_time();
-        lv_label_set_text(time_label, time_str);
-        lv_label_set_text(date_label, date_str);
-        lv_label_set_text(week_label, week_str);
+        if (time_label != NULL && lv_obj_is_valid(time_label))
+            lv_label_set_text(time_label, time_str);
+        if (date_label != NULL && lv_obj_is_valid(date_label))
+            lv_label_set_text(date_label, date_str);
+        if (week_label != NULL && lv_obj_is_valid(week_label))
+            lv_label_set_text(week_label, week_str);
     }
     else if (page_type == TIME_TYPE_3)
     {
@@ -163,42 +166,38 @@ static void refresh(lv_event_t *event)
     static bool is_first_init = true;
     if (device_state->wifi_connect_state == WPA_WIFI_CONNECT && is_first_init)
     {
-        http_get_weather_async(WEATHER_KEY, device_state->weather_city);
+        http_get_weather_async(WEATHER_KEY, device_state->weather_location);
         em_hal_time_ntpd_update();
         is_first_init = false;
     }
     // TODO check wifi state
-    if (device_state->wifi_connect_state == WPA_WIFI_CONNECT)
+    if (wifi_img != NULL && lv_obj_is_valid(wifi_img))
     {
-        lv_img_set_src(wifi_img, GET_IMAGE_PATH("icon_wifi_connect.png"));
+        if (device_state->wifi_connect_state == WPA_WIFI_CONNECT)
+            lv_img_set_src(wifi_img, GET_IMAGE_PATH("icon_wifi_connect.png"));
+        else
+            lv_img_set_src(wifi_img, GET_IMAGE_PATH("icon_wifi_disconnect.png"));
     }
-    else
+    if (ble_img != NULL && lv_obj_is_valid(ble_img))
     {
-        lv_img_set_src(wifi_img, GET_IMAGE_PATH("icon_wifi_disconnect.png"));
+        if (device_state->ble_mesh_state == CONNECT)
+            lv_img_set_src(ble_img, GET_IMAGE_PATH("icon_ble_connect.png"));
+        else
+            lv_img_set_src(ble_img, GET_IMAGE_PATH("icon_ble_disconnect.png"));
     }
-    if (device_state->ble_mesh_state == CONNECT)
+    if (vol_img != NULL && lv_obj_is_valid(vol_img))
     {
-        lv_img_set_src(ble_img, GET_IMAGE_PATH("icon_ble_connect.png"));
+        if (device_state->volume_value == 0)
+            lv_img_set_src(vol_img, GET_IMAGE_PATH("icon_volx.png"));
+        else
+            lv_img_set_src(vol_img, GET_IMAGE_PATH("icon_vol.png"));
     }
-    else
+    if (alarm_img != NULL && lv_obj_is_valid(alarm_img))
     {
-        lv_img_set_src(ble_img, GET_IMAGE_PATH("icon_ble_disconnect.png"));
-    }
-    if (device_state->volume_value == 0)
-    {
-        lv_img_set_src(vol_img, GET_IMAGE_PATH("icon_volx.png"));
-    }
-    else
-    {
-        lv_img_set_src(vol_img, GET_IMAGE_PATH("icon_vol.png"));
-    }
-    if (device_state->is_open_type1 == true || device_state->is_open_type2 == true)
-    {
-        lv_img_set_src(alarm_img, GET_IMAGE_PATH("icon_alarm_state.png"));
-    }
-    else
-    {
-        lv_img_set_src(alarm_img, GET_IMAGE_PATH(""));
+        if (device_state->is_open_type1 == true || device_state->is_open_type2 == true)
+            lv_img_set_src(alarm_img, GET_IMAGE_PATH("icon_alarm_state.png"));
+        else
+            lv_img_set_src(alarm_img, GET_IMAGE_PATH(""));
     }
 }
 
@@ -206,9 +205,9 @@ static void refresh_weather(lv_event_t *event)
 {
     printf("refresh_weather_main\n");
     device_state_t *device_state = get_device_state();
-    http_get_weather_async(WEATHER_KEY, device_state->weather_city);
-    http_get_air_async(WEATHER_KEY, device_state->weather_city);
-    if (page_type == TIME_TYPE_1)
+    http_get_weather_async(WEATHER_KEY, device_state->weather_location);
+    http_get_air_async(WEATHER_KEY, device_state->weather_latlon);
+    if (page_type == TIME_TYPE_1 && location_label != NULL && lv_obj_is_valid(location_label))
     {
         printf("set_location_text\n");
         lv_label_set_text(location_label, device_state->weather_city);
@@ -217,7 +216,7 @@ static void refresh_weather(lv_event_t *event)
 
 void update_weather_label() {
     device_state_t *device_state = get_device_state();
-    if (page_type == TIME_TYPE_1)
+    if (page_type == TIME_TYPE_1 && weather_label != NULL && lv_obj_is_valid(weather_label))
     {
         printf("set_weather_text\n");
         lv_label_set_text(weather_label, device_state->weather_info);
@@ -225,7 +224,7 @@ void update_weather_label() {
 }
 void update_air_label() {
     device_state_t *device_state = get_device_state();
-    if (page_type == TIME_TYPE_1)
+    if (page_type == TIME_TYPE_1 && air_label != NULL && lv_obj_is_valid(air_label))
     {
         printf("set_air_text\n");
         lv_label_set_text(air_label, device_state->air_info);
@@ -259,7 +258,7 @@ static void time_sync_click_event_cb(lv_event_t *e)
     if (device_state->wifi_connect_state == WPA_WIFI_CONNECT)
     {
         em_hal_time_ntpd_update();
-        http_get_weather_async(WEATHER_KEY, device_state->weather_city);
+        http_get_weather_async(WEATHER_KEY, device_state->weather_location);
     }
 }
 
